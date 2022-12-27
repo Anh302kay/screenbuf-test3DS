@@ -1,0 +1,6 @@
+build
+screenbuf-test3DS.*
+screenbuf-test3DS-strip.*
+screenbuf-test.*
+screenbuf-test-strip.*
+*.s
