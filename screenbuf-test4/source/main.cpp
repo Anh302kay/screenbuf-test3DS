@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
     romfsInit();
     gfxInit(GSP_RGB565_OES, GSP_RGB565_OES, false);
     consoleInit(GFX_BOTTOM, NULL);
-    gfxSetDoubleBuffering(GFX_TOP, false);
+  //  gfxSetDoubleBuffering(GFX_TOP, false);
     u8 *topscr = (u8*)topscrADR;
     memset(topscr, 255, BUF_SIZE);
 
@@ -206,13 +206,14 @@ int main(int argc, char* argv[])
             x += 1;
         }
 
-        clearBuf(topscr, {0,100,100});
-        renderRect(topscr, x, y, 20, 20, {255,255,255});
+        clearBuf(topscr, {0, 100, 100});
+        renderRect(topscr, x, y, 20, 20, {255, 255, 255});
 
         gfxFlushBuffers();
         gfxSwapBuffers();
 
         gspWaitForVBlank();
+        topscr = gfxGetFramebuffer(GFX_TOP, GFX_LEFT, nullptr, nullptr);
     }
 
     gfxExit();
