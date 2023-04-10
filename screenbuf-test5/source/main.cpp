@@ -135,6 +135,9 @@ void drawImg(u16* buf, u16* img, int x, int y, int width, int height)
     if (x >= 400 || y >= 240 || (signed int)width + x <= 0 || (signed int)height + y <= 0)
         return;
 
+    int xOffset = 0;
+    int yOffset = 0;
+
     if (y + height > 240)
         height = 240 - y;
 
@@ -146,12 +149,9 @@ void drawImg(u16* buf, u16* img, int x, int y, int width, int height)
 
     if (x < 0)
     {
-        width += x;
-        x = 0;
+        xOffset = abs(x);
     }
-    int xOffset = 0;
-    int yOffset = 0;
-    for(int i = 0; i < width*height; i++)
+    for(int i = height*xOffset; i < width*height; i++)
     {
         const int index = (x + 1 + xOffset) * 240 - y - height + yOffset;
         if(index > BUF_SIZE)
@@ -332,7 +332,7 @@ int main(int argc, char* argv[])
         clearBuf(topscr, {0, 100, 100});
         renderRect(topscr, x, y, 20, 20, {255, 255, 255});
 
-        drawImg2((u16*)topscr, test, 0, 0, 10, 11);
+        drawImg((u16*)topscr, test, x, y, 10, 11);
 
         gfxFlushBuffers();
         gfxSwapBuffers();
