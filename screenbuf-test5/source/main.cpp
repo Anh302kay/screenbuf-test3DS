@@ -135,17 +135,17 @@ void drawImg(u16* buf, u16* img, int x, int y, int width, int height)
     if (x >= 400 || y >= 240 || (signed int)width + x <= 0 || (signed int)height + y <= 0)
         return;
 
-    int xOffset = 0;
-    int yOffset = 0;
+    int heightOffset = 0;
 
     if (y + height > 240)
-        height = 240 - y;
+        heightOffset = y+height-240;
 
-    if ( y < 0)
-    {
-        height += y;
-        y = 0;
-    }
+    // if ( y < 0)
+    // {
+    //     heightOffset = y;
+    // }
+    int xOffset = 0;
+    int yOffset = 0;
 
     if (x < 0)
     {
@@ -156,13 +156,16 @@ void drawImg(u16* buf, u16* img, int x, int y, int width, int height)
         const int index = (x + 1 + xOffset) * 240 - y - height + yOffset;
         if(index > BUF_SIZE)
             return;
-        buf[index] = img[i];
+        buf[index] = img[i + heightOffset];
         if((i+1) % (height) == 0)
         xOffset++;    
 
         yOffset++;
         if(yOffset == height)
-        yOffset = 0;
+        {
+            yOffset = heightOffset;
+            //i = (heightOffset != 0) ? i - heightOffset : i;
+        }
 
         
     }
@@ -181,8 +184,6 @@ void drawImg2(u16* buf, u16* img, int x, int y, int width, int height)
     if (y + height > 240)
     {
         yOffset2 = y+height-240;
-        //height = 240 - y;
-        std::cout << yOffset2 << "\n";
         
     }
 
@@ -289,6 +290,7 @@ int main(int argc, char* argv[])
                   0x0000, 0x0000, 0x0000, 0x0000, 0x1234, 0x0000, 0x0000, 0x0000, 0x0000,0x0000, 0x0000,
                   0x1234, 0x0000, 0x0000, 0x0000, 0x1234, 0x0000, 0x0000, 0x0000, 0x0000,0x0000, 0x0000};
 
+    u16 test2[] = {0, 0, 0, 0, 0, 18887, 20936, 20968, 0, 0, 0, 0, 0, 0, 0, 0, 20934, 59065, 65470, 65439, 18920, 0, 0, 0, 0, 0, 22950, 22982, 61080, 65469, 65502, 65471, 18920, 0, 0, 0, 0, 22949, 48207, 22948, 61080, 65502, 65502, 65503, 18920, 18919, 0, 0, 0, 27043, 50220, 24994, 63127, 65501, 65502, 65437, 20933, 63160, 20965, 0, 22982, 52267, 54281, 50218, 27074, 61079, 65468, 25025, 58800, 65204, 22979, 0, 24998, 52234, 56327, 52232, 60815, 25026, 25025, 58799, 58766, 58799, 63124, 22982, 24998, 52234, 56327, 54312, 62861, 60844, 60844, 58799, 58767, 58799, 63124, 22982, 22950, 52235, 54280, 33152, 62862, 62892, 60845, 25057, 23011, 22978, 61078, 20935, 24999, 52237, 33089, 45735, 31074, 58801, 23010, 61176, 59129, 65501, 18887, 20936, 0, 28996, 45737, 35075, 43689, 25029, 61145, 65501, 65502, 65503, 65471, 18888, 0, 31076, 45705, 35107, 41641, 22949, 65470, 65502, 65503, 65471, 65471, 18888, 0, 28996, 47753, 35075, 43722, 22982, 65503, 18920, 16839, 65503, 18887, 0, 0, 31044, 47753, 35075, 41641, 22951, 65471, 65471, 65471, 20968, 0, 0, 0, 29029, 45738, 33060, 41674, 22951, 18888, 18920, 18920, 0, 0, 0, 0, 0, 27014, 28997, 41675, 22951, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24998, 0, 0, 0, 0, 0, 0, 0};
 
     renderText(std::to_string(duration).c_str(), topscr, 0, 100, {100,100,100});
     u64 start1 = svcGetSystemTick();
@@ -332,7 +334,7 @@ int main(int argc, char* argv[])
         clearBuf(topscr, {0, 100, 100});
         renderRect(topscr, x, y, 20, 20, {255, 255, 255});
 
-        drawImg((u16*)topscr, test, x, y, 10, 11);
+        drawImg2((u16*)topscr, test2, x, y, 17, 12);
 
         gfxFlushBuffers();
         gfxSwapBuffers();
