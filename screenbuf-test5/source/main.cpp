@@ -137,8 +137,8 @@ void drawImg(u16* buf, u16* img, int x, int y, int width, int height)
 
     int heightOffset = 0;
 
-    if (y + height > 240)
-        heightOffset = y+height-240;
+    // if (y + height > 240)
+    //     heightOffset = y+height-240;
 
     // if ( y < 0)
     // {
@@ -153,19 +153,24 @@ void drawImg(u16* buf, u16* img, int x, int y, int width, int height)
     }
     for(int i = height*xOffset; i < width*height; i++)
     {
-        const int index = (x + 1 + xOffset) * 240 - y - height + yOffset;
-        if(index > BUF_SIZE)
-            return;
-        buf[index] = img[i + heightOffset];
-        if((i+1) % (height) == 0)
-        xOffset++;    
-
-        yOffset++;
-        if(yOffset == height)
+        if (y + height - yOffset > 0 && y + height - yOffset -1 < 240)
         {
-            yOffset = heightOffset;
-            //i = (heightOffset != 0) ? i - heightOffset : i;
+            const int index = (x + 1 + xOffset) * 240 - y - height + yOffset;
+            if(index > BUF_SIZE)
+                return;
+            buf[index] = img[i + heightOffset];
         }
+            if((i+1) % (height) == 0)
+            xOffset++;    
+
+            yOffset++;
+            if(yOffset == height)
+            {
+                yOffset = heightOffset;
+                //i = (heightOffset != 0) ? i - heightOffset : i;
+            }
+        
+
 
         
     }
@@ -334,7 +339,7 @@ int main(int argc, char* argv[])
         clearBuf(topscr, {0, 100, 100});
         renderRect(topscr, x, y, 20, 20, {255, 255, 255});
 
-        drawImg2((u16*)topscr, test2, x, y, 17, 12);
+        drawImg((u16*)topscr, test2, x, y, 17, 12);
 
         gfxFlushBuffers();
         gfxSwapBuffers();
