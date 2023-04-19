@@ -130,6 +130,87 @@ void rotateImage(const u16* src, u16* dst, int width, int height, double angle)
     }
 }
 
+void rotateImage2(const u16* src, u16* dst, int width, int height, double angle)
+{
+    int x, y, new_x, new_y;
+    double radians = angle * PI / 180.0;
+    double cosine = cos(radians);
+    double sine = sin(radians);
+    int cx = width / 2;   // center x
+    int cy = height / 2;  // center y
+    
+    for (x = 0; x < width; ++x)
+    {
+        for (y = 0; y < height; ++y)
+        {
+            // Calculate new coordinates after rotation
+            double float_x = (x - cx) * cosine + (y - cy) * sine + cx;
+            double float_y = (y - cy) * cosine - (x - cx) * sine + cy;
+            new_x = (int)round(float_x);
+            new_y = (int)round(float_y);
+
+            // Nearest neighbor interpolation (find nearest pixel in source image)
+            if (new_x >= 0 && new_x < width && new_y >= 0 && new_y < height)
+            {
+                dst[new_x * height + new_y] = src[x * height + y];
+            }
+        }
+    }
+}
+
+void rotateImage3(const u16* src, u16** dst, int* width, int* height, double angle)
+{
+    // Compute new dimensions of rotated image
+    double radians = angle * PI / 180.0;
+    double cosine = cos(radians);
+    double sine = sin(radians);
+    float cx = *width / 2;   // center x
+    float cy = *height / 2;  // center y
+    int new_width = (int)(abs(*width * cosine) + abs(*height * sine));
+    int new_height = (int)(abs(*height * cosine) + abs(*width * sine));
+
+    std::cout << " " << new_width <<", " << new_height << "\n";
+
+    // Allocate or resize destination buffer
+    if (*dst == NULL || new_width * new_height > *width * *height)
+    {
+        *dst = (u16*)realloc(*dst, new_width * new_height * sizeof(u16));
+        if (*dst == NULL)
+        {
+            // Error handling
+            std::cout << "asfsdf";
+            return;
+        }
+        *width = new_width;
+        *height = new_height;
+
+
+    }
+
+    // Clear destination buffer
+    memset(*dst, 0, new_width * new_height * sizeof(u16));
+    
+    // Rotate image
+    int x, y, new_x, new_y;
+    for (x = 0; x < *width; ++x)
+    {
+        for (y = 0; y < *height; ++y)
+        {
+            // Calculate new coordinates after rotation
+            double float_x = (x - cx) * cosine + (y - cy) * sine + cx;
+            double float_y = (y - cy) * cosine - (x - cx) * sine + cy;
+            new_x = (int)round(float_x);
+            new_y = (int)round(float_y);
+
+            // Nearest neighbor interpolation (find nearest pixel in source image)
+            if (new_x >= 0 && new_x < new_width && new_y >= 0 && new_y < new_height)
+            {
+                (*dst)[new_x * new_height + new_y] = src[x * *height + y];
+            }
+        }
+    }
+}
+
 void drawImg(u16* buf, u16* img, int x, int y, int width, int height)
 {
     if (x >= 400 || y >= 240 || (signed int)width + x <= 0 || (signed int)height + y <= 0)
@@ -297,6 +378,14 @@ int main(int argc, char* argv[])
 
     u16 test2[] = {0, 0, 0, 0, 0, 18887, 20936, 20968, 0, 0, 0, 0, 0, 0, 0, 0, 20934, 59065, 65470, 65439, 18920, 0, 0, 0, 0, 0, 22950, 22982, 61080, 65469, 65502, 65471, 18920, 0, 0, 0, 0, 22949, 48207, 22948, 61080, 65502, 65502, 65503, 18920, 18919, 0, 0, 0, 27043, 50220, 24994, 63127, 65501, 65502, 65437, 20933, 63160, 20965, 0, 22982, 52267, 54281, 50218, 27074, 61079, 65468, 25025, 58800, 65204, 22979, 0, 24998, 52234, 56327, 52232, 60815, 25026, 25025, 58799, 58766, 58799, 63124, 22982, 24998, 52234, 56327, 54312, 62861, 60844, 60844, 58799, 58767, 58799, 63124, 22982, 22950, 52235, 54280, 33152, 62862, 62892, 60845, 25057, 23011, 22978, 61078, 20935, 24999, 52237, 33089, 45735, 31074, 58801, 23010, 61176, 59129, 65501, 18887, 20936, 0, 28996, 45737, 35075, 43689, 25029, 61145, 65501, 65502, 65503, 65471, 18888, 0, 31076, 45705, 35107, 41641, 22949, 65470, 65502, 65503, 65471, 65471, 18888, 0, 28996, 47753, 35075, 43722, 22982, 65503, 18920, 16839, 65503, 18887, 0, 0, 31044, 47753, 35075, 41641, 22951, 65471, 65471, 65471, 20968, 0, 0, 0, 29029, 45738, 33060, 41674, 22951, 18888, 18920, 18920, 0, 0, 0, 0, 0, 27014, 28997, 41675, 22951, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24998, 0, 0, 0, 0, 0, 0, 0};
 
+    u16 test3[204] = {0};
+    u16* test4 = (u16*)malloc(sizeof(u16) * 204);
+    memset(test4, 0, 204*2);
+
+    int width = 17, height = 12;
+
+    rotateImage3(test2, &test4, &width, &height, 90);
+
     renderText(std::to_string(duration).c_str(), topscr, 0, 100, {100,100,100});
     u64 start1 = svcGetSystemTick();
     drawImg2((u16*)topscr, test, 20, 20, 10, 11);
@@ -339,7 +428,7 @@ int main(int argc, char* argv[])
         clearBuf(topscr, {0, 100, 100});
         renderRect(topscr, x, y, 20, 20, {255, 255, 255});
 
-        drawImg((u16*)topscr, test2, x, y, 17, 12);
+        drawImg((u16*)topscr, test2, x, y, width, height);
 
         gfxFlushBuffers();
         gfxSwapBuffers();
